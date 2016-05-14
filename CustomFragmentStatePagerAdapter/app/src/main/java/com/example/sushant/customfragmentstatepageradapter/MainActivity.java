@@ -1,36 +1,33 @@
 package com.example.sushant.customfragmentstatepageradapter;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.*;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity {
 
-    private boolean ifFragmentSwitched;
-    private Adapter mPagerAdapter;
+    private boolean fragmentIsSwitched;
+    private ExamplePagerAdapter mPagerAdapter;
     private ViewPager mPager;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
 
         mPager = (ViewPager)findViewById(R.id.pager);
-        mPagerAdapter = new Adapter(getSupportFragmentManager());
+        mPagerAdapter = new ExamplePagerAdapter(getSupportFragmentManager());
 
         if (savedInstanceState != null) {
-            ifFragmentSwitched = savedInstanceState.getBoolean("ifFragmentSwitched");
+            fragmentIsSwitched = savedInstanceState.getBoolean("fragmentIsSwitched");
         } else {
-            ifFragmentSwitched = false;
+            fragmentIsSwitched = false;
         }
 
         updateAdapterData();
@@ -40,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean("ifFragmentSwitched", ifFragmentSwitched);
+        outState.putBoolean("fragmentIsSwitched", fragmentIsSwitched);
     }
 
     @Override
@@ -53,11 +50,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == android.R.id.home) {
-            super.onBackPressed();
-        }
         if (id == R.id.action_settings) {
-            ifFragmentSwitched = !ifFragmentSwitched;
+            fragmentIsSwitched = !fragmentIsSwitched;
             updateAdapterData();
             // Force our view pager back to index 0 in order to detach the index 2 fragment and save its state.
             mPager.setCurrentItem(0);
@@ -68,12 +62,98 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateAdapterData() {
-        if (ifFragmentSwitched) {
-            mPagerAdapter.question_labels[2] = "A";
-            mPagerAdapter.questions[2] = "AAAAAAAAAA";
+        if (fragmentIsSwitched) {
+            mPagerAdapter.labels[2] = "4";
+            mPagerAdapter.colors[2] = Color.BLUE;
         } else {
-            mPagerAdapter.question_labels[2] = "C";
-            mPagerAdapter.questions[2] = "CCCCCCCCCC";
+            mPagerAdapter.labels[2] = "3";
+            mPagerAdapter.colors[2] = Color.GREEN;
         }
     }
+
+    // Uncomment these to use the custom adapter!
+    //public class ExamplePagerAdapter extends NewFragmentStatePagerAdapter {
+    public class ExamplePagerAdapter extends FragmentStatePagerAdapter {
+
+        String[] labels = new String[] {
+                "1",
+                "2",
+                "3"
+        };
+
+        int[] colors = new int[] {
+                Color.RED,
+                Color.YELLOW,
+                Color.GREEN
+        };
+
+        public ExamplePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+        // Uncomment these to use the custom adapter!
+        //@Override
+        //public String getTag(int position) {
+        //    return labels[position];
+        //}
+
+        @Override
+        public Fragment getItem(int i) {
+            return PlaceholderFragment.newInstance(labels[i], colors[i]);
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+    }
+
+
+    /**
+     * A placeholder fragment containing a simple view.
+     */
+    public static class PlaceholderFragment extends Fragment {
+
+        public static PlaceholderFragment newInstance(String label, int color) {
+            PlaceholderFragment fragment = new PlaceholderFragment();
+            Bundle args = new Bundle();
+            args.putString("label", label);
+            args.putInt("color", color);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        public PlaceholderFragment() {
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_layout, container, false);
+            Bundle args = getArguments();
+
+            // Background color always comes from arguments.
+            rootView.setBackgroundColor(args.getInt("color"));
+
+            // If we have a saved state, we pull our label from that. Otherwise it comes from args.
+            TextView label = (TextView)rootView.findViewById(R.id.text_label);
+            if (savedInstanceState == null) {
+                label.setText(args.getString("label"));
+            } else {
+                label.setText(savedInstanceState.getString("savedStateLabel"));
+            }
+
+            // And our "arguments label" shows what this fragment *should* be showing.
+            TextView argsLabel = (TextView)rootView.findViewById(R.id.args_label);
+            argsLabel.setText(getResources().getString(R.string.should_be_showing, args.getString("label")));
+
+            return rootView;
+        }
+
+        @Override
+        public void onSaveInstanceState(Bundle outState) {
+            super.onSaveInstanceState(outState);
+            outState.putString("savedStateLabel", getArguments().getString("label"));
+        }
+    }
+
 }

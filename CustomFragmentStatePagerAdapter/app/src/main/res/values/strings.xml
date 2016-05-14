@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">CustomFragmentStatePagerAdapter</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Switch Fragment</string>
     <string name="should_be_showing">Should be Showing: %s</string>
 </resources>
